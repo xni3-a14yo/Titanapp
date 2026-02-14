@@ -12,19 +12,30 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.29.2' # This is a very stable version for Flet
+        channel: 'stable'
+
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
         
     - name: Install Flet
-      run: |
-        pip install flet
+      run: pip install flet
         
     - name: Build APK
       run: |
-        # We add 'flet' to the requirements right before building
         echo "flet" > requirements.txt
+        # We add --no-interactive so it doesn't ask any questions
         flet build apk --verbose
         
     - name: Upload APK
