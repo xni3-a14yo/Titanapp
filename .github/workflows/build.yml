@@ -9,23 +9,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
     
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
         
-    - name: Install Dependencies
+    - name: Install Flet
       run: |
         pip install flet
         
     - name: Build APK
       run: |
-        flet build apk --product "Titan Calc" --verbose
+        # We add 'flet' to the requirements right before building
+        echo "flet" > requirements.txt
+        flet build apk --verbose
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: Titan-Calculator-v1  # <--- THIS IS THE FILE NAME
+        name: Titan-Calculator-v1
         path: build/apk/app-release.apk
