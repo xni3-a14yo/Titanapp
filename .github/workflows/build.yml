@@ -34,13 +34,12 @@ jobs:
         with:
           name: Titan-Android-Universal
           path: build/apk/app-release.apk
-
-  # ---------------------------------------------------
-  # JOB 2: WINDOWS (Fixed the "Black Circle" Crash)
+          
+# ---------------------------------------------------
+  # JOB 2: WINDOWS (Fixed: Auto-answer "y")
   # ---------------------------------------------------
   build-windows:
     runs-on: windows-latest
-    # THIS IS THE SECRET FIX FOR WINDOWS:
     env:
       PYTHONIOENCODING: utf-8
     steps:
@@ -53,7 +52,8 @@ jobs:
       - name: Build Windows
         run: |
           echo "flet" > requirements.txt
-          flet build windows
+          # The Windows way to say "yes":
+          echo "y" | flet build windows
       - uses: actions/upload-artifact@v4
         with:
           name: Titan-Windows-Portable
