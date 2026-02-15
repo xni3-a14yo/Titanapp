@@ -21,7 +21,7 @@ jobs:
       - name: Build APK
         run: |
           echo "flet" > requirements.txt
-          yes | flet build apk --target-platform ${{ matrix.platform }}
+          yes | flet build apk --arch ${{ matrix.platform }}
       - uses: actions/upload-artifact@v4
         with:
           name: Titan-${{ matrix.platform }}
