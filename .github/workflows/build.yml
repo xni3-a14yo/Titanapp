@@ -1,43 +1,47 @@
-name: Build APK
+name: Titan Multi-Platform Build
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  build:
+  # Job for Android (Splits into ARM and ARM64)
+  build-android:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        platform: [android-arm, android-arm64]
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Flet
+        run: pip install flet
+      - name: Build APK
+        run: |
+          echo "flet" > requirements.txt
+          yes | flet build apk --target-platform ${{ matrix.platform }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Titan-${{ matrix.platform }}
+          path: build/apk/app-release.apk
 
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        
-    - name: Install Flet
-      run: pip install flet
-        
-    - name: Build APK
-      run: |
-        echo "flet" > requirements.txt
-        
-        # -------------------------------------------------------
-        # THE FIX: We use "yes" to automatically answer "y"
-        # to the install question so it doesn't crash.
-        # -------------------------------------------------------
-        yes | flet build apk --verbose
-        
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: Titan-Calculator-v1
-        path: build/apk/app-release.apk
+  # Job for Windows
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Flet
+        run: pip install flet
+      - name: Build Windows
+        run: |
+          echo "flet" > requirements.txt
+          flet build windows
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Titan-Windows
+          path: build/windows
