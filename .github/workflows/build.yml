@@ -1,35 +1,48 @@
-name: Titan Multi-Platform Build
+name: Titan Stable Build
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  # Job for Android (Splits into ARM and ARM64)
+  # ---------------------------------------------------
+  # JOB 1: ANDROID (Reverted to "Universal" for Safety)
+  # ---------------------------------------------------
   build-android:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        platform: [android-arm, android-arm64]
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          
       - name: Install Flet
         run: pip install flet
-      - name: Build APK
+        
+      - name: Build APK (Universal)
         run: |
           echo "flet" > requirements.txt
-          yes | flet build apk --arch ${{ matrix.platform }}
+          # We use standard "yes" to skip prompts
+          # We REMOVED the splitting flags to stop the ABI error
+          yes | flet build apk --verbose
+          
       - uses: actions/upload-artifact@v4
         with:
-          name: Titan-${{ matrix.platform }}
+          name: Titan-Android-Universal
           path: build/apk/app-release.apk
 
-  # Job for Windows
+  # ---------------------------------------------------
+  # JOB 2: WINDOWS (Fixed the "Black Circle" Crash)
+  # ---------------------------------------------------
   build-windows:
     runs-on: windows-latest
+    # THIS IS THE SECRET FIX FOR WINDOWS:
+    env:
+      PYTHONIOENCODING: utf-8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -43,5 +56,5 @@ jobs:
           flet build windows
       - uses: actions/upload-artifact@v4
         with:
-          name: Titan-Windows
+          name: Titan-Windows-Portable
           path: build/windows
